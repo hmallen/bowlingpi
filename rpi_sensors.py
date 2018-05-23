@@ -9,35 +9,46 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-switch_bounce = 200 # ms
-
-gpio_event_detected = False
+pin_reference = GPIO.BOARD
 
 gpio_pin = 7    # Physical pin number
 
+switch_bounce = 200     # ms
 
-def callback_sensor_event(pi_gpio_pin):
+gpio_event_detected = False
+
+
+def callback_sensor_event(channel):
     #global gpio_event_detected
 
-    gpio_event_detected = True
+    logger.info('Callback function triggered by GPIO event detection.')
 
-    print('Event detected {0}'.format(pi_gpio_pin))
+    logger.info('Channel Event: ' + str(channel))
 
-    #curr_val = GPIO.input(pi_gpio_pin)     # This is already handled by the event detection
+    gpio_event_detected = True      # What is purpose of this variable? Won't reset to False...
+    logger.debug('gpio_event_detected: ' + str(gpio_event_detected))
+
+    #print('Event detected {0}'.format(channel))
+
+    #curr_val = GPIO.input(channel)     # This is already handled by the event detection
 
     #print(' Value {0}'.format(curr_val))
 
 
 def main():
+    logger.debug('Entering main loop.')
+
     while True:
         # Wait for a GPIO event
         # 0.1s delay added to significantly reduce CPU load
 
         time.sleep(0.1)
 
+    logger.debug('Leaving main loop.')
+
 
 if __name__ == '__main__':
-    GPIO.setmode(GPIO.BOARD)
+    GPIO.setmode(pin_reference)
 
     GPIO.setup(gpio_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
