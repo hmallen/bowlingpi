@@ -1,2 +1,2 @@
-# pi_sensors
+# rpi_sensors
 Work for Amish Patel on Upwork.com
