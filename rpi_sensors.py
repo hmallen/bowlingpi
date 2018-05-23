@@ -1,8 +1,13 @@
+import logging
 import os
 import sys
 import time
 
 import RPi.GPIO as GPIO
+
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 switch_bounce = 200 # ms
 
@@ -12,10 +17,6 @@ gpio_pin = 7    # Physical pin number
 
 
 def callback_sensor_event(pi_gpio_pin):
-    # This prints out "Hello, John!"
-    name = "John"
-    print("Hello, %s!" % name)
-
     #global gpio_event_detected
 
     gpio_event_detected = True
