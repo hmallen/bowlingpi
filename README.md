@@ -1,2 +1,2 @@
-# amish_pi_sensors
+# pi_sensors
 Work for Amish Patel on Upwork.com
