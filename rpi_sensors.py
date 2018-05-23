@@ -38,7 +38,7 @@ def main():
 if __name__ == '__main__':
     GPIO.setmode(GPIO.BOARD)
 
-    GPIO.setup(GPIO_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(gpio_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
     GPIO.add_event_detect(gpio_pin, GPIO.RISING, callback=callback_sensor_event, bouncetime=switch_bounce)
 
