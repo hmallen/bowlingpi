@@ -48,6 +48,7 @@ def main():
 
 
 if __name__ == '__main__':
+    try:
     GPIO.setmode(pin_reference)
 
     GPIO.setup(gpio_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -58,3 +59,12 @@ if __name__ == '__main__':
 
     #if GPIO.event_detected(gpio_pin):  # You already have a callback function defined
         #gpio_event_detected = False
+
+    except Exception as e:
+        logger.exception('Exception raised.')
+        logger.exception(e)
+
+    except KeyboardInterrupt:
+        logger.info('Exit signal received.')
+
+        sys.exit()
