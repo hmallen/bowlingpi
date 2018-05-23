@@ -49,16 +49,16 @@ def main():
 
 if __name__ == '__main__':
     try:
-    GPIO.setmode(pin_reference)
+        GPIO.setmode(pin_reference)
 
-    GPIO.setup(gpio_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(gpio_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-    GPIO.add_event_detect(gpio_pin, GPIO.RISING, callback=callback_sensor_event, bouncetime=switch_bounce)
+        GPIO.add_event_detect(gpio_pin, GPIO.RISING, callback=callback_sensor_event, bouncetime=switch_bounce)
 
-    main()  # Better to use "main" than "run" due to potential conflicts
+        main()  # Better to use "main" than "run" due to potential conflicts
 
-    #if GPIO.event_detected(gpio_pin):  # You already have a callback function defined
-        #gpio_event_detected = False
+        #if GPIO.event_detected(gpio_pin):  # You already have a callback function defined
+            #gpio_event_detected = False
 
     except Exception as e:
         logger.exception('Exception raised.')
