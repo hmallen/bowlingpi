@@ -1,0 +1,17 @@
+﻿QUESTIONS:
+
+- RPi OS?
+
+- IR Sensor Details
+
+- Can I rewrite the program?
+-- Clearly written by C/embedded developer
+-- Can make more "Pythonic"
+
+INFO:
+
+- Slack Workspace
+
+TO DO:
+
+- Make new script with two sensors
