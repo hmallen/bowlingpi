@@ -19,4 +19,7 @@ RaspberryPi-based control unit for bowling alley functions, including, but not l
 <b>Needs Testing:</b>
 
 
+
 <b>Done:</b>
+
+
