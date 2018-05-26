@@ -15,7 +15,7 @@ gpio_pin = 7    # Physical pin number
 
 switch_bounce = 200     # ms
 
-gpio_event_detected = False
+gpio_event_detected = False     # Is this boolean necessary?
 
 
 def callback_sensor_event(channel):
