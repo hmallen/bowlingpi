@@ -1,6 +1,6 @@
 # BowlingPi
 
-RaspberryPi-based control unit for bowling alley functions, including, but not limited to, detection of stuck balls and jammed sweepers.
+RaspberryPi-based error detection unit for bowling alley functions, including, but not limited to, detection of stuck balls and jammed sweepers.
 
 <b>To Do:</b>
 - Modify single sensor script to handle data from 2 sensors simultaneously
