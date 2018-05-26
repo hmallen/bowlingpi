@@ -16,7 +16,7 @@ sensor_two = 11    # Physical pin numbering
 
 switch_bounce = 200     # ms
 
-global gpio_event_detected
+#global gpio_event_detected
 gpio_event_detected = False     # Is this boolean necessary?
 
 
@@ -39,7 +39,7 @@ def callback_sensor_event(channel):
 
 
 def main():
-    #global gpio_event_detected
+    global gpio_event_detected
 
     logger.debug('Entering main loop.')
 
