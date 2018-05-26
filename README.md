@@ -11,7 +11,7 @@ RaspberryPi-based control unit for bowling alley functions, including, but not l
 <b>Done:</b>
 - Rewrite provided single sensor script to conform with Pythonic standards
 
-<h2>Client Work in Parallel:</h2>
+<h2>Client Work Being Done in Parallel:</h2>
 
 <b>To Do:</b>
 - Add voltage regulator to limit GPIO input voltage to 3.3V
