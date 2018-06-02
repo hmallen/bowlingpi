@@ -1,4 +1,4 @@
-from time import sleep,ctime
+from time import sleep, ctime
 import os
 import sys
 from threading import Timer
@@ -41,7 +41,8 @@ MYSQL_INFO = {
 
 # Add 200ms for switch bounce - Not sure if this is needed for our sensors
 # This controls out quickly our GPIO respond to event changes
-SWITCH_BOUNCE 		= 100 	# ms
+#SWITCH_BOUNCE 		= 100 	# ms
+SWITCH_BOUNCE 		= 200 	# ms
 
 #============================================
 # Internal GLOBAL variables
@@ -89,23 +90,32 @@ MYSQL					= None
 #
 #==================================================
 
+
 def info(msg):
-	print("{} : {}".format(ctime(),msg))
+	print("{} : {}".format(ctime(), msg))
+
 
 def error_msg(msg):
 	global ERROR_MSGS
 	global ERRORS
-	msg = "{} : ** ERROR ** {}".format(ctime(),msg)
+
+	msg = "{} : ** ERROR ** {}".format(ctime(), msg)
+
 	print(msg)
+
 	ERROR_MSGS.append(msg)
+
 
 def clear_counts(type=None):
 	global COUNTS
+
 	if type:
 		COUNTS[type] = 0
+
 	else:
 		for name in COUNTS:
 			COUNTS[name] = 0
+
 
 def clear_curr_vals():
 	global SENSOR_CONFIG
@@ -114,20 +124,24 @@ def clear_curr_vals():
 	for sensor_name in SENSOR_CONFIG:
 		SENSOR_CURR_VALS[sensor_name] = 0
 
+
 def clear_errors():
 	global ERRORS
 	for error in ERRORS:
 		ERRORS[error] = False
+
 
 def clear_timers():
 	global TIMERS
 	for type in TIMERS:
 		TIMERS[type] = []
 
+
 #==================================================
 # Timeout methods
 # Used for dealing with variable timeouts
 #==================================================
+
 
 def timeout_general(**kwargs):
 	global ERRORS
@@ -148,6 +162,7 @@ def timeout_general(**kwargs):
 
 	# Stop the timer
 	_timer_stop(error_type)
+
 
 def _timer_start(type=None,**kwargs):
 	global TIMERS
@@ -177,6 +192,7 @@ def _timer_start(type=None,**kwargs):
 	TIMERS[type].append(timer)
 	return timer
 
+
 def _timer_stop(type=None,**kwargs):
 	global TIMERS
 	global ERRORS
@@ -198,11 +214,13 @@ def _timer_stop(type=None,**kwargs):
 
 	return timer
 
+
 def _timer_stop_all(type=None):
 	global TIMERS
 
 	while TIMERS[type]:
 		_timer_stop(type)
+
 
 def _has_timer(type=None):
 	global TIMERS
@@ -213,6 +231,7 @@ def _has_timer(type=None):
 	else:
 		return False
 
+
 def _get_timer(type=None,index=0):
 	global TIMERS
 	timer = None
@@ -220,9 +239,12 @@ def _get_timer(type=None,index=0):
 		timer = TIMERS[index]
 	return timer
 
+
 #==================================================
 #
 #==================================================
+
+
 def mysql_connect():
 	global MYSQL
 	global MYSQL_INFO
@@ -240,6 +262,7 @@ def mysql_connect():
 		info("Unable to establish connection to MYSQL server")
 		MYSQL = None
 
+
 def mysql_insert_msg(msg):
 	global MYSQL
 
@@ -256,6 +279,7 @@ def mysql_insert_msg(msg):
 	MYSQL.commit()
 	cursor.close()
 
+
 def flush_errors():
 	global ERROR_MSGS
 	while ERROR_MSGS:
@@ -263,15 +287,19 @@ def flush_errors():
 		mysql_insert_msg(msg)
 	ERROR_MSGS = []
 
+
 #==================================================
 #
 #==================================================
+
+
 def real_sensor_val(sensor_name):
 	'''
 	Read the sensor value.  Takes into account configured active_hi_lo setting
 	Return: ACTIVE|INACTIVE|None
 	'''
 	global SENSOR_CONFIG
+
 	pi_gpio_pin 	= SENSOR_CONFIG[sensor_name]['pi_gpio_pin']
 	active_hi_lo 	= SENSOR_CONFIG[sensor_name]['active_hi_lo'].upper()
 
@@ -279,16 +307,21 @@ def real_sensor_val(sensor_name):
 
 	if pi_gpio_pin == None:
 		return_val = INACTIVE
+
 	else:
 		curr_val = GPIO.input(pi_gpio_pin)
+
 		if active_hi_lo == "HI":
 			if curr_val == GPIO.HIGH:
 				return_val = ACTIVE
+
 			else:
 				return_val = INACTIVE
+
 		elif active_hi_lo == "LO":
 			if curr_val == GPIO.LOW:
 				return_val = ACTIVE
+
 			else:
 				return_val = INACTIVE
 
@@ -297,12 +330,15 @@ def real_sensor_val(sensor_name):
 
 	return return_val
 
+
 def callback_sensor_event(pi_gpio_pin):
 	'''
 	This method gets called when there is a positive or negative edge on a sensor
 	'''
 	global GPIO_EVENT_DETECTED
+
 	GPIO_EVENT_DETECTED = True
+
 
 def init():
 	clear_counts()
@@ -310,6 +346,7 @@ def init():
 	clear_errors()
 	init_sensors()
 	mysql_connect()
+
 
 def init_sensors():
 	'''
@@ -334,24 +371,29 @@ def init_sensors():
 
 		if pi_gpio_pin == None:
 			info("Sensor {} is not configured to a Pi GPIO pin".format(sensor_name))
+
 		else:
 			# Sensor is connected to a pin
 
 			# Setup the Pi pin based on active HI/LO state
 			active_hi_lo = SENSOR_CONFIG[sensor_name]['active_hi_lo'].upper()
+
 			info("Configuring sensor [{}] Pi GPIO pin [{}] to be active [{}]".format(sensor_name,pi_gpio_pin,active_hi_lo))
 
 			if active_hi_lo == "LO":
 				# When sensor active it drives 0 -- Connected to ground
 				GPIO.setup(pi_gpio_pin,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+
 			elif active_hi_lo == "HI":
 				# When sensor active it drives HI -- Connected to VCC
 				GPIO.setup(pi_gpio_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
+
 			else:
 				sys.exit("Error - Sensor {} does not have a valid HI/LO active state".format(sensor_name))
 
 			# Configure a callback method
 			GPIO.add_event_detect(pi_gpio_pin,GPIO.BOTH,callback=callback_sensor_event,bouncetime=SWITCH_BOUNCE)
+
 
 def run_specification():
 	'''
@@ -391,8 +433,10 @@ def run_specification():
 			# Start a timer if we haven't already started one and we are not currently in error mode
 			if not _has_timer('ESDI') and not ERRORS['ESDI']:
 				_timer_start('ESDI',error_msg="E - Sweep Down")
+
 		else:
 			_timer_stop_all('ESDI')
+
 			ERRORS['ESDI'] = False
 
 		# Sweep out and up
@@ -400,20 +444,23 @@ def run_specification():
 			# Start a timer if we haven't already started one and we are not currently in error mode
 			if not _has_timer('ESDU') and not ERRORS['ESDU']:
 				_timer_start('ESDU',error_msg="E - Pin Jam")
+
 		else:
 			_timer_stop_all('ESDU')
+
 			ERRORS['ESDU'] = False
 
 		# Ball thrown
 		if EBDT:
-
 			if ESDI or ESDU:
 				error_msg("E - Ball thrown at sweep - Dead ball")
+
 			else:
 				# Seems to be a valid ball
 				# Count it
 				# Start a Ball return timer
 				_timer_start('BALL_RETURN',error_msg="Ball Return")
+
 				ERRORS['BALL_RETURN'] = False
 				COUNTS['BALL_COUNT'] += 1
 	else:
@@ -422,6 +469,7 @@ def run_specification():
 
 		_timer_stop_all('ESDI')
 		_timer_stop_all('ESDU')
+
 		ERRORS['ESDI'] = False
 		ERRORS['ESDU'] = False
 
@@ -430,32 +478,38 @@ def run_specification():
 			# Start a timer if we haven't already started one and we are not currently in error mode
 			if not _has_timer('OSDI') and not ERRORS['OSDI']:
 				_timer_start('OSDI',error_msg="O - Sweep Down")
+
 		else:
 			_timer_stop_all('OSDI')
+
 			ERRORS['OSDI'] = False
 
 		if OSDU:
 			# Start a timer if we haven't already started one and we are not currently in error mode
 			if not _has_timer('OSDU') and not ERRORS['OSDU']:
 				_timer_start('OSDU',error_msg="O - Pin Jam")
+
 		else:
 			_timer_stop_all('OSDU')
 			ERRORS['OSDU'] = False
 
 		if OBDT:
-
 			if OSDI or OSDU:
 				error_msg("O - Ball thrown at sweep - Dead ball")
+
 			else:
 				_timer_start('BALL_RETURN',error_msg="Ball return")
+
 				ERRORS['BALL_RETURN'] = False
 				COUNTS['BALL_COUNT'] += 1
+
 	else:
 		if OBDT:
 			error_msg("O - Ball thrown down off lane")
 
 		_timer_stop_all('OSDI')
 		_timer_stop_all('OSDU')
+
 		ERRORS['OSDI'] = False
 		ERRORS['OSDU'] = False
 
@@ -473,6 +527,7 @@ def run_specification():
 	# Any negative counts
 	if COUNTS['BALL_COUNT'] < 0:
 		error_msg("Ball Return - Ball count < 0")
+
 		ERRORS['BALL_RETURN'] = True
 
 	# ?? - This just says we threw too many balls, does it need to be a BALL_RETURN error?
@@ -481,9 +536,11 @@ def run_specification():
 		if EBDT or OBDT:
 			if COUNTS['BALL_COUNT'] > 2:
 				error_msg("Ball Count > 2 - Too many balls thrown")
+
 	elif EM and EBDT:
 		if COUNTS['BALL_COUNT'] > 1:
 			error_msg("E - Ball Count > 1 - Too many balls thrown")
+
 	elif OM and OBDT:
 		if COUNTS['BALL_COUNT'] > 1:
 			error_msg("O - Ball Count > 1 - Too many balls thrown")
@@ -496,15 +553,19 @@ def run_specification():
 
 	info("COUNTS: {}".format(COUNTS))
 
+
 def update_curr_vals():
 	global SENSOR_CURR_VALS
+
 	for sensor_name in SENSOR_CONFIG:
 		SENSOR_CURR_VALS[sensor_name] = GET_SENSOR_VAL(sensor_name)
+
 
 def prt_curr_vals():
 	global SENSOR_CURR_VALS
 
 	info("=========================================")
+
 	info("EM[{}] EBDT[{}] EBDB[{}] ESDI[{}] ESDU[{}]".format(
 			SENSOR_CURR_VALS['EM']*1
 		,	SENSOR_CURR_VALS['EBDT']*1
@@ -512,6 +573,7 @@ def prt_curr_vals():
 		,	SENSOR_CURR_VALS['ESDI']*1
 		,	SENSOR_CURR_VALS['ESDU']*1
 		))
+
 	info("OM[{}] OBDT[{}] OBDB[{}] OSDI[{}] OSDU[{}]".format(
 			SENSOR_CURR_VALS['OM']*1
 		,	SENSOR_CURR_VALS['OBDT']*1
@@ -519,6 +581,7 @@ def prt_curr_vals():
 		,	SENSOR_CURR_VALS['OSDI']*1
 		,	SENSOR_CURR_VALS['OSDU']*1
 		))
+
 
 def run():
 	'''
