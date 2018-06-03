@@ -1,4 +1,4 @@
-from time import sleep, ctime
+dfrom time import sleep, ctime
 import os
 import sys
 from threading import Timer
