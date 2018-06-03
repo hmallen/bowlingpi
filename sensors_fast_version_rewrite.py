@@ -1,8 +1,12 @@
-from time import sleep, ctime
 import os
 import sys
 from threading import Timer
 import time		# Import time module to handle small delays that decrease CPU usage
+#from time import sleep, ctime
+
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 #============================================
 # USER CONFIGURATION
@@ -50,7 +54,7 @@ ACTIVE 					= True
 INACTIVE 				= False
 SENSOR_CURR_VALS		= {}
 
-GPIO_EVENT_DETECTED 	= False
+#GPIO_EVENT_DETECTED 	= False
 
 ERROR_MSGS				= []
 
@@ -85,22 +89,28 @@ BALL_RETURN_ERR_MODE	= False
 
 MYSQL					= None
 
+DISABLE_POWER_CHECK		= False
+
 #==================================================
 #
 #==================================================
 
 
 def info(msg):
-	print("{} : {}".format(ctime(), msg))
+	#print("{} : {}".format(ctime(), msg))
+	#print("{} : {}".format(time.ctime(), msg))
+	logger.info("{} : {}".format(time.ctime(), msg))
 
 
 def error_msg(msg):
 	global ERROR_MSGS
 	global ERRORS
 
-	msg = "{} : ** ERROR ** {}".format(ctime(), msg)
+	#msg = "{} : ** ERROR ** {}".format(ctime(), msg)
+	msg = "{} : ** ERROR ** {}".format(time.ctime(), msg)
 
-	print(msg)
+	#print(msg)
+	logger.error(msg)
 
 	ERROR_MSGS.append(msg)
 
@@ -126,12 +136,14 @@ def clear_curr_vals():
 
 def clear_errors():
 	global ERRORS
+
 	for error in ERRORS:
 		ERRORS[error] = False
 
 
 def clear_timers():
 	global TIMERS
+
 	for type in TIMERS:
 		TIMERS[type] = []
 
@@ -171,6 +183,7 @@ def _timer_start(type=None,**kwargs):
 	timeout_sec = TIMEOUTS[type]
 	if 'timeout_sec' in kwargs:
 		timeout_sec = kwargs['timeout_sec']
+
 		del kwargs['timeout_sec']
 
 	# Information passed to timeout function
@@ -184,11 +197,14 @@ def _timer_start(type=None,**kwargs):
 
 	# Create the timer and START it
 	timer = Timer(timeout_sec,timeout_general,[],args)
-	info("Starting {} timer {} for [{}] seconds".format(type,timer,timeout_sec))
+
+	info("Starting {} timer {} for [{}] seconds".format(type, timer, timeout_sec))
+
 	timer.start()
 
 	# Add the timer to the appropriate list
 	TIMERS[type].append(timer)
+
 	return timer
 
 
@@ -203,12 +219,15 @@ def _timer_stop(type=None,**kwargs):
 		del kwargs['index']
 
 	timer = None
+
 	if TIMERS[type]:
 		timer = TIMERS[type][index]
+
 		if not ERRORS[type]:
 			info("Canceling {} active timer {}".format(type,timer))
 
 		timer.cancel()
+
 		del TIMERS[type][index]
 
 	return timer
@@ -223,19 +242,25 @@ def _timer_stop_all(type=None):
 
 def _has_timer(type=None):
 	global TIMERS
+
 	if type not in TIMERS:
 		return False
+
 	elif TIMERS[type]:
 		return True
+
 	else:
 		return False
 
 
 def _get_timer(type=None,index=0):
 	global TIMERS
+
 	timer = None
+
 	if _has_timer(type):
 		timer = TIMERS[index]
+
 	return timer
 
 
@@ -256,9 +281,12 @@ def mysql_connect():
 										, 	database=MYSQL_INFO['database']
 										,	host=MYSQL_INFO['host']
 										)
+
 		info("Connection established")
+
 	except:
 		info("Unable to establish connection to MYSQL server")
+
 		MYSQL = None
 
 
@@ -275,15 +303,24 @@ def mysql_insert_msg(msg):
               "VALUES (\'{}\')".format(msg))
 
 	cursor.execute(add_msg)
+
 	MYSQL.commit()
+
 	cursor.close()
 
 
 def flush_errors():
 	global ERROR_MSGS
+
 	while ERROR_MSGS:
 		msg = ERROR_MSGS.pop()
-		mysql_insert_msg(msg)
+
+		if MYSQL != None:
+			mysql_insert_msg(msg)
+
+		#else:
+			#logger.error(msg)
+
 	ERROR_MSGS = []
 
 
@@ -334,13 +371,21 @@ def callback_sensor_event(pi_gpio_pin):
 	'''
 	This method gets called when there is a positive or negative edge on a sensor
 	'''
-	global GPIO_EVENT_DETECTED
+	#global GPIO_EVENT_DETECTED
 
-	GPIO_EVENT_DETECTED = True
+	#GPIO_EVENT_DETECTED = True
+
+	# Read all sensor values
+	# SENSOR_CURR_VALS
+	#	EM : ACTIVE|INACTIVE|None...
+	update_curr_vals()
+
+	# Run error checks and counter updates
+	run_specification()
 
 
 #def init():
-def init_program(enable_mysql=False):
+def init_program(enable_mysql=False, disable_power_check=False):
 	logger.info('Clearing ball counts.')
 
 	clear_counts()		# Clear ball counts
@@ -355,7 +400,7 @@ def init_program(enable_mysql=False):
 
 	logger.info('Initializing sensors.')
 
-	init_sensors()		# Initialize sensors
+	init_sensors(disable_power_check=disable_power_check)		# Initialize sensors
 
 	if enable_mysql == True:
 		logger.info('Enabling MySQL.')
@@ -364,6 +409,9 @@ def init_program(enable_mysql=False):
 
 	else:
 		logger.info('MySQL disabled.')
+
+	if disable_power_check == True:
+		DISABLE_POWER_CHECK = True
 
 
 def init_sensors():
@@ -378,7 +426,6 @@ def init_sensors():
 
 	# Walk the sensors in the CONFIG variable
 	for sensor_name in sorted(SENSOR_CONFIG):
-
 		# Allow for us to mimic a test_value
 		# Only used for debug
 		if 'test_value' not in SENSOR_CONFIG[sensor_name]:
@@ -450,7 +497,7 @@ def run_specification():
 		if ESDI:
 			# Start a timer if we haven't already started one and we are not currently in error mode
 			if not _has_timer('ESDI') and not ERRORS['ESDI']:
-				_timer_start('ESDI',error_msg="E - Sweep Down")
+				_timer_start('ESDI', error_msg="E - Sweep Down")
 
 		else:
 			_timer_stop_all('ESDI')
@@ -461,7 +508,7 @@ def run_specification():
 		if ESDU:
 			# Start a timer if we haven't already started one and we are not currently in error mode
 			if not _has_timer('ESDU') and not ERRORS['ESDU']:
-				_timer_start('ESDU',error_msg="E - Pin Jam")
+				_timer_start('ESDU', error_msg="E - Pin Jam")
 
 		else:
 			_timer_stop_all('ESDU')
@@ -477,7 +524,7 @@ def run_specification():
 				# Seems to be a valid ball
 				# Count it
 				# Start a Ball return timer
-				_timer_start('BALL_RETURN',error_msg="Ball Return")
+				_timer_start('BALL_RETURN', error_msg="Ball Return")
 
 				ERRORS['BALL_RETURN'] = False
 				COUNTS['BALL_COUNT'] += 1
@@ -495,7 +542,7 @@ def run_specification():
 		if OSDI:
 			# Start a timer if we haven't already started one and we are not currently in error mode
 			if not _has_timer('OSDI') and not ERRORS['OSDI']:
-				_timer_start('OSDI',error_msg="O - Sweep Down")
+				_timer_start('OSDI', error_msg="O - Sweep Down")
 
 		else:
 			_timer_stop_all('OSDI')
@@ -505,7 +552,7 @@ def run_specification():
 		if OSDU:
 			# Start a timer if we haven't already started one and we are not currently in error mode
 			if not _has_timer('OSDU') and not ERRORS['OSDU']:
-				_timer_start('OSDU',error_msg="O - Pin Jam")
+				_timer_start('OSDU', error_msg="O - Pin Jam")
 
 		else:
 			_timer_stop_all('OSDU')
@@ -516,7 +563,7 @@ def run_specification():
 				error_msg("O - Ball thrown at sweep - Dead ball")
 
 			else:
-				_timer_start('BALL_RETURN',error_msg="Ball return")
+				_timer_start('BALL_RETURN', error_msg="Ball return")
 
 				ERRORS['BALL_RETURN'] = False
 				COUNTS['BALL_COUNT'] += 1
@@ -563,11 +610,14 @@ def run_specification():
 		if COUNTS['BALL_COUNT'] > 1:
 			error_msg("O - Ball Count > 1 - Too many balls thrown")
 
-	if not EM and not OM:
-		# No machines on
-		clear_counts()
-		clear_errors()
-		clear_timers()
+	if DISABLE_POWER_CHECK == False:
+		if not EM and not OM:
+			# No machines on
+			clear_counts()
+
+			clear_errors()
+
+			clear_timers()
 
 	info("COUNTS: {}".format(COUNTS))
 
@@ -608,15 +658,14 @@ def run_program():
 	'''
 	global SENSOR_CONFIG
 	global SENSOR_CURR_VALS
-	global GPIO_EVENT_DETECTED
+	#global GPIO_EVENT_DETECTED
 	global ERROR_MSGS
 
 	while True:
-
+		"""
 		# Wait for a GPIO event
 		# Hopefully this becomes less CPU intense
 		if GPIO_EVENT_DETECTED:
-
 			# Turn event off to show that we recognize the new event
 			GPIO_EVENT_DETECTED = False
 
@@ -630,6 +679,11 @@ def run_program():
 
 		# Flush ERRORS
 		flush_errors()
+		"""
+
+		if len(ERROR_MSGS) > 0:
+			# Flush errors
+			flush_errors()
 
 		time.sleep(0.00001)	# 0.01ms delay in main loop drops CPU usage to almost 0%
 
@@ -644,7 +698,7 @@ if __name__ == "__main__":
 	GET_SENSOR_VAL = real_sensor_val
 
 	#init()
-	init_program(enable_mysql=False)
+	init_program(enable_mysql=False, disable_power_check=True)
 
 	#run()
 	run_program()
