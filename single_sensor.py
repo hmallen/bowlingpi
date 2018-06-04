@@ -34,7 +34,7 @@ if __name__ == '__main__':
         GPIO.setmode(pin_reference)
 
         #GPIO.setup(gpio_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(pi_gpio_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Sensors actually driven low when activated, not high
+        GPIO.setup(gpio_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Sensors actually driven low when activated, not high
 
         GPIO.add_event_detect(gpio_pin, GPIO.BOTH,
                               callback=callback_sensor_event,
@@ -49,4 +49,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         logger.info('Exit signal received.')
 
-        sys.exit()
+        #sys.exit()
+
+    finally:
+        GPIO.cleanup(gpio_pin)

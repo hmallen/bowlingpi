@@ -97,4 +97,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         logger.info('Exit signal received.')
 
-        sys.exit()
+        #sys.exit()
+
+    finally:
+        GPIO.cleanup([gpio_pin_first, gpio_pin_second])
