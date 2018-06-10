@@ -251,12 +251,13 @@ def run():
 	global SENSOR_CURR_VALS
 	global GPIO_EVENT_DETECTED
 
+	print('Program ready. Waiting for ball to be thrown.')
+
 	while True:
 		try:
 			# Wait for a GPIO event
 			# Hopefully this becomes less CPU intense
 			if GPIO_EVENT_DETECTED:
-
 				# Turn event off to show that we recognize the new event
 				GPIO_EVENT_DETECTED = False
 
@@ -289,7 +290,7 @@ if __name__ == "__main__":
 
 	init()
 
-	print('Running main program.')
+	print('Starting main program.')
 
 	try:
 		run()	# Run main program
