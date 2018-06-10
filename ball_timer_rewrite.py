@@ -487,23 +487,29 @@ def run():
 	global ERROR_MSGS
 
 	while True:
+		try:
+			# Wait for a GPIO event
+			# Hopefully this becomes less CPU intense
+			if GPIO_EVENT_DETECTED:
 
-		# Wait for a GPIO event
-		# Hopefully this becomes less CPU intense
-		if GPIO_EVENT_DETECTED:
+				# Turn event off to show that we recognize the new event
+				GPIO_EVENT_DETECTED = False
 
-			# Turn event off to show that we recognize the new event
-			GPIO_EVENT_DETECTED = False
+				# Read all sensor values
+				# SENSOR_CURR_VALS
+				#	EM : ACTIVE|INACTIVE|None...
+				update_curr_vals()
 
-			# Read all sensor values
-			# SENSOR_CURR_VALS
-			#	EM : ACTIVE|INACTIVE|None...
-			update_curr_vals()
+				# Run error checks and counter updates
+				run_specification()
 
-			# Run error checks and counter updates
-			run_specification()
+			sleep(0.00001)	# Added 0.01ms (10us) delay to reduce CPU load
 
-		sleep(0.00001)	# Added 0.01ms (10us) delay to reduce CPU load
+		except Exception as e:
+			print('Exception raised in run(): ', e)
+
+		except KeyboardInterrupt:
+			raise
 
 #==================================================
 # MAIN
@@ -514,7 +520,11 @@ if __name__ == "__main__":
 
 	GET_SENSOR_VAL = real_sensor_val	# Create alias for sensor value function
 
+	print('Initializing sensors, counts, timers, and errors.')
+
 	init()	# Initialize everything
+
+	print('Running main program.')
 
 	try:
 		run()	# Run main program
