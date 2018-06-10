@@ -3,7 +3,7 @@ import os
 import sys
 from threading import Timer
 
-# ball_timer.py ---> 0.001ms delay
+# ball_timer_3.py ---> 0.1ms delay
 
 #============================================
 # USER CONFIGURATION
@@ -273,7 +273,7 @@ def run():
 
 			# Added else to skip sleep if event detected, allowing immediate recheck
 			else:
-				sleep(0.001)	# Added 0.001ms (1us) delay to reduce CPU load
+				sleep(0.1)	# Added 0.1ms (100us) TEST delay to reduce CPU load
 
 		except Exception as e:
 			print('Exception raised in run(): ', e)
