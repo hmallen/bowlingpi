@@ -553,7 +553,7 @@ def run():
 				# Run error checks and counter updates
 				run_specification()
 
-			sleep(0.001)	# Added 0.001ms (1us) delay to reduce CPU load
+			#sleep(0.001)	# Added 0.001ms (1us) delay to reduce CPU load
 
 		except Exception as e:
 			print('Exception raised in run(): ', e)
