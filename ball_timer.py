@@ -251,7 +251,9 @@ def run():
 	global SENSOR_CURR_VALS
 	global GPIO_EVENT_DETECTED
 
-	print('Program ready. Waiting for ball to be thrown.')
+	print('Program ready.')
+
+	print('Waiting for ball to be thrown...')
 
 	while True:
 		try:
