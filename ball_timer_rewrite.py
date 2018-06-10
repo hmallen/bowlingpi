@@ -586,6 +586,10 @@ if __name__ == "__main__":
 		print('Exit signal received.')
 
 	finally:
+		print('Cleaning-up GPIO pin states.')
+
+		GPIO.cleanup()
+
 		print('Done.')
 
 		sys.exit()
