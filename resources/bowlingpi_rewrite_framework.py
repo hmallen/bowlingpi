@@ -287,7 +287,6 @@ def init_sensors():
 
 	# Walk the sensors in the CONFIG variable
 	for sensor_name in sorted(SENSOR_CONFIG):
-
 		# Allow for us to mimic a test_value
 		# Only used for debug
 		if 'test_value' not in SENSOR_CONFIG[sensor_name]:
@@ -391,6 +390,7 @@ def run_specification():
 		COUNTS['BALL_COUNT'] = 0
 		_timer_stop_all('BALL_RETURN')
 
+	"""
 	# Even side
 	if EM:
 		# Sweep down and in
@@ -501,6 +501,7 @@ def run_specification():
 		clear_timers()
 
 	info("COUNTS: {}".format(COUNTS))
+	"""
 
 def update_curr_vals():
 	global SENSOR_CURR_VALS
