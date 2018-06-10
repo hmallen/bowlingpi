@@ -3,6 +3,8 @@ import os
 import sys
 from threading import Timer
 
+import RPi.GPIO as GPIO
+
 # ball_timer_1.py ---> 0.0001ms delay
 
 #============================================
@@ -286,8 +288,6 @@ def run():
 # MAIN
 #==================================================
 if __name__ == "__main__":
-	import RPi.GPIO as GPIO
-
 	GET_SENSOR_VAL = real_sensor_val	# Create alias for sensor value function
 
 	print('Initializing sensors.')
