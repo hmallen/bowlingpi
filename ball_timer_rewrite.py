@@ -527,3 +527,5 @@ if __name__ == "__main__":
 
 	finally:
 		print('Done.')
+
+		sys.exit()
