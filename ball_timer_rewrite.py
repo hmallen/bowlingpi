@@ -334,7 +334,7 @@ def run_specification():
 	OBDT	= SENSOR_CURR_VALS['OBDT']
 	OBDB	= SENSOR_CURR_VALS['OBDB']
 
-	prt_curr_vals()
+	prt_curr_vals()		# Move to below timer functions?
 
 	if ERRORS['BALL_RETURN']:
 		COUNTS['BALL_COUNT'] = 0
@@ -516,4 +516,14 @@ if __name__ == "__main__":
 
 	init()	# Initialize everything
 
-	run()	# Run main program
+	try:
+		run()	# Run main program
+
+	except Exception as e:
+		print('Exception: ', e)
+
+	except KeyboardInterrupt:
+		print('Exit signal received.')
+
+	finally:
+		print('Done.')
